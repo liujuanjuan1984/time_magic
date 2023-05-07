@@ -14,17 +14,24 @@ class TimeBill:
     """time bill bot"""
 
     def __init__(
-        self, count_types, origin_file: str, image_dir: str, begin_of_week: int = 3
+        self,
+        count_types,
+        origin_file: str,
+        image_dir: str,
+        begin_of_week: int = 3,
+        is_cover: bool = True,
     ):
         """
         origin_file: the file of origin data, each line is a record of time cost
         image_dir: the directory to save images
         begin_of_week: 0-6, 0 is Monday, 6 is Sunday, you can set anyday to your first day of week
+        is_cover: if True, the image will cover the old one
         """
         self.count_types = count_types
         self.origin_file = origin_file
         self.image_dir = image_dir
         self.begin_of_week = begin_of_week or 3
+        self.is_cover = is_cover
         self.files = {
             "DAY": self.origin_file.replace(".txt", "_count_day.txt"),
             "WEEK": self.origin_file.replace(".txt", "_count_week.txt"),
@@ -194,8 +201,7 @@ class TimeBill:
 
         while start_day < datetime.now() and start_day < default_end_day:
             end_day = start_day + timedelta(days=days - 1)
-            if end_day > datetime.now():
-                logger.info("end_day > now, break")
+            if start_day > datetime.now():
                 break
             dfx = df[(df["date"] >= start_day) & (df["date"] <= end_day)]
             title = "".join(
@@ -216,9 +222,10 @@ class TimeBill:
                 os.makedirs(os.path.dirname(pngfile))
             dfx = dfx.set_index("date")
             dfx = dfx[self.count_types]
-            if not os.path.exists(pngfile):
-                self.draw_area(dfx, title, pngfile)
             start_day += timedelta(days=days)
+            if os.path.exists(pngfile) and not self.is_cover:
+                continue
+            self.draw_area(dfx, title, pngfile)
 
     def draw_by_year(self, start_day, end_day, result_type="WEEK"):
         """draw by year, all data in one image
@@ -244,13 +251,14 @@ class TimeBill:
         pngfile = os.path.join(
             self.image_dir,
             f"{result_type}_YEAR",
-            f"TimeBill_Year_{start_day.strftime('%Y-%m-%d')}_{result_type}.png",
+            f"TimeBill_{start_day.strftime('%Y-%m-%d')}_{end_day.strftime('%Y-%m-%d')}_{result_type}.png",
         )
         if not os.path.exists(os.path.dirname(pngfile)):
             os.makedirs(os.path.dirname(pngfile))
         dfx = dfx.set_index("date")
         dfx = dfx[self.count_types]
-        self.draw_area(dfx, title, pngfile)
+        if not os.path.exists(pngfile) or self.is_cover:
+            self.draw_area(dfx, title, pngfile)
 
     def update_draws(self, start_year=2017, month=7, day=20):
         """
