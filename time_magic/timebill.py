@@ -174,7 +174,7 @@ class TimeBill:
             stacked=True,
         )
         fig = ax.get_figure()
-        fig.savefig(pngfile)
+        fig.savefig(pngfile)  # , bbox_inches="tight")
         plt.close()
         logger.info("done %s", pngfile)
 
