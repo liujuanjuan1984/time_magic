@@ -14,6 +14,6 @@ count_types = ["0-其它", "1-健康", "2-成长", "3-家庭", "4-工作", "5-�
 origin_file = "D:\my_timedata\data\alldata.txt"
 image_dir = r"D:\my_timedata\images"
 
-bot = TimeBill(count_types, origin_file, image_dir)
+bot = TimeBill(count_types, origin_file, image_dir, bbox_inches="tight")
 bot.update_counts()
 bot.update_draws(2016, 9, 10)

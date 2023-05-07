@@ -12,6 +12,7 @@ class LifeInWeeks:
         figure_scale=1.0,
         dpi=100,
         edgecolor="black",
+        bbox_inches=None,
         years=90,
         weeks_per_year=52,
     ):
@@ -20,6 +21,7 @@ class LifeInWeeks:
         self.figure_scale = figure_scale
         self.dpi = dpi
         self.edgecolor = edgecolor
+        self.bbox_inches = bbox_inches
         self.birthday = datetime.datetime.strptime(birthday, "%Y-%m-%d").date()
 
     def _patch(self, week, age, color):
@@ -33,11 +35,10 @@ class LifeInWeeks:
         )
 
     def draw(self):
-        fig, ax = plt.subplots(
-            figsize=(8.27 * self.figure_scale, 11.69 * self.figure_scale), dpi=self.dpi
-        )
+        figsize = (8.27 * self.figure_scale, 11.69 * self.figure_scale)
+        fig, ax = plt.subplots(figsize=figsize, dpi=self.dpi)
 
-        ax.set_title("A 90-Year Human Life in Weeks", fontsize=16)
+        ax.set_title(f"Life in Weeks Since {self.birthday}", fontsize=16)
         ax.set_xlabel("Week of Year", fontsize=12)
         ax.set_ylabel("Age", fontsize=12)
 
@@ -77,7 +78,7 @@ class LifeInWeeks:
                 ax.add_patch(self._patch(week, age, color))
 
         buffer = io.BytesIO()
-        fig.savefig(buffer, format="png", dpi=self.dpi)  # , bbox_inches="tight")
+        fig.savefig(buffer, format="png", dpi=self.dpi, bbox_inches=self.bbox_inches)
         imgbytes = buffer.getvalue()
         plt.close(fig)
 

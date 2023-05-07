@@ -20,6 +20,7 @@ class TimeBill:
         image_dir: str,
         begin_of_week: int = 3,
         is_cover: bool = True,
+        bbox_inches=None,
     ):
         """
         origin_file: the file of origin data, each line is a record of time cost
@@ -32,6 +33,7 @@ class TimeBill:
         self.image_dir = image_dir
         self.begin_of_week = begin_of_week or 3
         self.is_cover = is_cover
+        self.bbox_inches = bbox_inches
         self.files = {
             "DAY": self.origin_file.replace(".txt", "_count_day.txt"),
             "WEEK": self.origin_file.replace(".txt", "_count_week.txt"),
@@ -174,7 +176,7 @@ class TimeBill:
             stacked=True,
         )
         fig = ax.get_figure()
-        fig.savefig(pngfile)  # , bbox_inches="tight")
+        fig.savefig(pngfile, bbox_inches=self.bbox_inches)
         plt.close()
         logger.info("done %s", pngfile)
 

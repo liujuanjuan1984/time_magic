@@ -4,5 +4,7 @@
 
 from time_magic import LifeInWeeks
 
-bot = LifeInWeeks("2012-11-16", figure_scale=1, dpi=100, edgecolor="white")
+bot = LifeInWeeks(
+    "2012-11-16", figure_scale=1, dpi=100, edgecolor="white", bbox_inches=None
+)
 bot.save("life_in_weeks.png")

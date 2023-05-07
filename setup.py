@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="time_magic",
-    version="0.3.0",
+    version="0.3.1",
     author="liujuanjuan1984",
     author_email="qiaoanlu@163.com",
     description="python tools all about time",
