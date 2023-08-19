@@ -34,31 +34,39 @@ class TimeBill:
         self,
         count_types,
         origin_file: str,
-        image_dir: str,
+        out_dir: str,
         begin_of_week: int = 3,
         is_cover: bool = True,
         bbox_inches=None,
     ):
         """
         origin_file: the file of origin data, each line is a record of time cost
-        image_dir: the directory to save images
+        out_dir: the directory to save images and data
         begin_of_week: 0-6, 0 is Monday, 6 is Sunday, you can set anyday to your first day of week
         is_cover: if True, the image will cover the old one
         """
         self.count_types = count_types
         self.origin_file = origin_file
-        self.image_dir = image_dir
         self.begin_of_week = begin_of_week or 3
         self.is_cover = is_cover
         self.bbox_inches = bbox_inches
+        self.out_dir = out_dir
+        self._check_dir(out_dir)
         self.files = {
-            "DAY": self.origin_file.replace(".txt", "_count_day.txt"),
-            "WEEK": self.origin_file.replace(".txt", "_count_week.txt"),
-            "WEEK4": self.origin_file.replace(".txt", "_count_4weeks.txt"),
-            "DayH": self.origin_file.replace(".txt", "_count_day_hour.txt"),
-            "WeekH": self.origin_file.replace(".txt", "_count_week_hour.txt"),
-            "Week4H": self.origin_file.replace(".txt", "_count_4weeks_hour.txt"),
+            "DAY": os.path.join(out_dir, "data", "timebill_count_day.txt"),
+            "WEEK": os.path.join(out_dir, "data", "timebill_count_week.txt"),
+            "WEEK4": os.path.join(out_dir, "data", "timebill_count_4weeks.txt"),
+            "DayH": os.path.join(out_dir, "data", "timebill_count_day_hour.txt"),
+            "WeekH": os.path.join(out_dir, "data", "timebill_count_week_hour.txt"),
+            "Week4H": os.path.join(out_dir, "data", "timebill_count_4weeks_hour.txt"),
         }
+
+    def _check_dir(self, out_dir):
+        data_dir = os.path.join(out_dir, "data")
+        images_dir = os.path.join(out_dir, "images")
+        for idir in [out_dir, data_dir, images_dir]:
+            if not os.path.exists(idir):
+                os.mkdir(idir)
 
     def _write_csvfile(self, results: dict, csvfile: str):
         """write results to csvfile"""
@@ -225,7 +233,8 @@ class TimeBill:
             )
 
             pngfile = os.path.join(
-                self.image_dir,
+                self.out_dir,
+                "images",
                 f"{result_type}_{days}",
                 f"TimeBill_{days}Days_{start_day.strftime('%Y-%m-%d')}_{result_type}.png",
             )
@@ -260,7 +269,8 @@ class TimeBill:
             ]
         )
         pngfile = os.path.join(
-            self.image_dir,
+            self.out_dir,
+            "images",
             f"{result_type}_YEAR",
             f"TimeBill_{start_day.strftime('%Y-%m-%d')}_{end_day.strftime('%Y-%m-%d')}_{result_type}.png",
         )

@@ -6,5 +6,5 @@ from time_magic.timebill import TimeBill
 
 logger = logging.getLogger(__name__)
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 logger.info("Version: %s", __version__)
