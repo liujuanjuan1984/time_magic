@@ -10,6 +10,23 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+def read_csvfile(csvfile: str):
+    """read csvfile to list of dict"""
+    with open(csvfile, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        data = [row for row in reader]
+    return data
+
+
+def write_csvfile(rows: list, csvfile: str, fieldnames: list):
+    """write results to csvfile"""
+    with open(csvfile, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
 class TimeBill:
     """time bill bot"""
 
@@ -43,27 +60,19 @@ class TimeBill:
             "Week4H": self.origin_file.replace(".txt", "_count_4weeks_hour.txt"),
         }
 
-    def read_csvfile(self, csvfile: str):
-        """read csvfile to list of dict"""
-        with open(csvfile, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            data = [row for row in reader]
-        return data
-
-    def write_csvfile(self, results: dict, csvfile: str):
+    def _write_csvfile(self, results: dict, csvfile: str):
         """write results to csvfile"""
+        rows = []
+        for date, data in results.items():
+            row = {"date": date, "total": data["total"]}
+            row.update(data["types"])
+            rows.append(row)
         fieldnames = ["date", "total"] + self.count_types
-        with open(csvfile, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
-            writer.writeheader()
-            for date, data in results.items():
-                row = {"date": date, "total": data["total"]}
-                row.update(data["types"])
-                writer.writerow(row)
+        return write_csvfile(rows, csvfile, fieldnames)
 
     def count_by_day(self, to_result_file=None):
         """count by day with the origin data"""
-        data = self.read_csvfile(self.origin_file)
+        data = read_csvfile(self.origin_file)
         results = {}
         for row in data:
             day_str = datetime.strptime(row["DATE"], "%Y-%m-%d").strftime("%Y-%m-%d")
@@ -91,7 +100,7 @@ class TimeBill:
         results = {k: results[k] for k in sorted(results.keys())}
 
         if to_result_file:
-            self.write_csvfile(results, to_result_file)
+            self._write_csvfile(results, to_result_file)
         return results
 
     def results_to_hours(self, results, to_hour_file=None, n=60):
@@ -110,7 +119,7 @@ class TimeBill:
             for k in self.count_types:
                 results_hours[date_str]["types"][k] = round(data["types"][k] / n, 2)
         if to_hour_file:
-            self.write_csvfile(results_hours, to_hour_file)
+            self._write_csvfile(results_hours, to_hour_file)
         return results_hours
 
     def count_by_week(self, day_results, weeks=1, to_result_file=None):
@@ -147,7 +156,7 @@ class TimeBill:
                 results[interval_key]["types"][type_name] += mins
 
         if to_result_file:
-            self.write_csvfile(results, to_result_file)
+            self._write_csvfile(results, to_result_file)
         return results
 
     def update_counts(self):
